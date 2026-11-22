@@ -1,0 +1,1019 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>segfault.gs — Public Showcase (Read-Only)</title>
+    <style>
+        :root {
+            --accent: #ff4b6e;
+            --accent-rgb: 255, 75, 110;
+            --bg-main: #0c0c0e;
+            --bg-panel: #131316;
+            --bg-card: #17171b;
+            --bg-inset: #0e0e11;
+            --border: #27272d;
+            --border-soft: #1f1f24;
+            --text-main: #f2f2f7;
+            --text-sub: #a0a3b1;
+            --text-muted: #6c6f7d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            background-image: radial-gradient(circle at 82% 8%, rgba(var(--accent-rgb), 0.13), transparent 36%), radial-gradient(circle at 12% 90%, rgba(var(--accent-rgb), 0.06), transparent 42%), linear-gradient(to right, rgba(255, 255, 255, 0.018) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 24px 24px, 24px 24px;
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+            line-height: 1.55;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            border-bottom: 1px solid var(--border);
+            background: rgba(14, 14, 17, 0.9);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .topbar-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 13px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .brand-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.4px;
+        }
+
+            .brand span {
+                color: var(--accent);
+            }
+
+        .badge-build {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: rgba(var(--accent-rgb), 0.14);
+            border: 1px solid rgba(var(--accent-rgb), 0.35);
+            color: var(--accent);
+        }
+
+        .badge-ro {
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: var(--bg-inset);
+            border: 1px solid var(--border);
+            color: var(--text-sub);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 6px;
+            background: var(--bg-inset);
+            border: 1px solid var(--border);
+            padding: 4px;
+            border-radius: 7px;
+        }
+
+        .nav-tab {
+            background: transparent;
+            border: none;
+            color: var(--text-sub);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 13px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+            .nav-tab:hover {
+                color: var(--text-main);
+            }
+
+            .nav-tab.active {
+                background: rgba(var(--accent-rgb), 0.18);
+                color: #fff;
+                border: 1px solid rgba(var(--accent-rgb), 0.45);
+            }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px 72px;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.16s ease;
+        }
+
+            .page.active {
+                display: block;
+            }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 24px;
+            align-items: start;
+            margin-bottom: 36px;
+        }
+
+        @media (max-width: 980px) {
+            .hero {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .hero-copy h1 {
+            font-size: 36px;
+            line-height: 1.15;
+            font-weight: 800;
+            letter-spacing: -0.7px;
+            margin-bottom: 14px;
+        }
+
+            .hero-copy h1 span {
+                color: var(--accent);
+            }
+
+        .hero-copy p {
+            color: var(--text-sub);
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+
+        .meta-strip {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .meta-pill {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 7px 12px;
+            font-size: 12px;
+            color: var(--text-sub);
+        }
+
+            .meta-pill strong {
+                color: var(--text-main);
+                font-weight: 600;
+            }
+
+        .action-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .primary-btn, .secondary-btn {
+            border-radius: 6px;
+            padding: 9px 15px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .primary-btn {
+            background: var(--accent);
+            border: 1px solid var(--accent);
+            color: #fff;
+        }
+
+            .primary-btn:hover {
+                filter: brightness(1.08);
+            }
+
+        .secondary-btn {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+            .secondary-btn:hover {
+                border-color: rgba(var(--accent-rgb), 0.55);
+            }
+
+        .stage-box {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+        }
+
+        .stage-head {
+            padding: 10px 14px;
+            background: #101013;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .stage-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-sub);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dot-live {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        .controls-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            align-items: center;
+        }
+
+        .ctrl-btn, .ctrl-select, .color-chip {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            border-radius: 5px;
+            font-size: 11px;
+            padding: 5px 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+            .ctrl-btn:hover, .ctrl-select:hover {
+                border-color: rgba(var(--accent-rgb), 0.6);
+            }
+
+            .ctrl-btn.active {
+                background: rgba(var(--accent-rgb), 0.16);
+                border-color: var(--accent);
+                color: #fff;
+            }
+
+        .color-chips {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .color-chip {
+            width: 18px;
+            height: 18px;
+            padding: 0;
+            border-radius: 4px;
+        }
+
+            .color-chip.selected {
+                outline: 2px solid #fff;
+                outline-offset: 1px;
+            }
+
+        .viewport {
+            position: relative;
+            min-height: 420px;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(22, 24, 32, 0.88), rgba(11, 12, 16, 0.95)), repeating-linear-gradient( 45deg, rgba(255, 255, 255, 0.014) 0px, rgba(255, 255, 255, 0.014) 2px, transparent 2px, transparent 8px );
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            align-content: start;
+        }
+
+        @media (max-width: 640px) {
+            .viewport {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .hud-wm {
+            grid-column: 1 / -1;
+            background: rgba(24, 28, 37, 0.92);
+            border: 1px solid rgba(178, 190, 214, 0.24);
+            border-radius: 7px;
+            padding: 6px 12px;
+            font-size: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 11px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+        }
+
+        .hud-wm-sep {
+            width: 1px;
+            height: 11px;
+            background: rgba(255, 255, 255, 0.14);
+        }
+
+        .hud-wm-val {
+            font-weight: 700;
+            color: #f4f6fc;
+        }
+
+        .hud-wm-unit {
+            color: var(--text-muted);
+            font-size: 11px;
+        }
+
+        .hud-widget {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .hud-header {
+            background: rgba(24, 28, 37, 0.92);
+            border: 1px solid rgba(178, 190, 214, 0.28);
+            border-radius: 7px;
+            height: 28px;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #f4f6fc;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+        }
+
+        .hud-header-ico {
+            width: 11px;
+            height: 11px;
+            border-radius: 2px;
+            border: 1.5px solid var(--accent);
+            display: inline-block;
+        }
+
+        .hud-rows-floating {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .hud-rows-sheet {
+            display: flex;
+            flex-direction: column;
+            background: rgba(22, 26, 35, 0.92);
+            border: 1px solid rgba(178, 190, 214, 0.22);
+            border-radius: 7px;
+            padding: 3px;
+            gap: 2px;
+        }
+
+        .hud-row {
+            background: rgba(25, 29, 39, 0.9);
+            border: 1px solid rgba(178, 190, 214, 0.16);
+            border-radius: 5px;
+            padding: 4px 7px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            font-size: 11px;
+        }
+
+        .hud-rows-sheet .hud-row {
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            padding: 3px 6px;
+        }
+
+        .hud-row-left {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: #e4e7f0;
+            min-width: 0;
+        }
+
+        .hud-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .hud-tag {
+            background: rgba(14, 16, 22, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+            padding: 1px 6px;
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--accent);
+            white-space: nowrap;
+        }
+
+        .skeet-card {
+            background: #141416;
+            border: 1px solid #2e2e34;
+            outline: 1px solid #0a0a0c;
+            border-radius: 2px;
+            padding: 14px 12px 11px;
+            position: relative;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+        }
+
+        .skeet-card-title {
+            position: absolute;
+            top: -8px;
+            left: 12px;
+            background: #141416;
+            padding: 0 5px;
+            font-size: 11px;
+            color: #d6d8e0;
+        }
+
+        .skeet-body {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .skeet-avatar {
+            width: 36px;
+            height: 36px;
+            flex-shrink: 0;
+            background: #101013;
+            border: 1px solid #35353d;
+            border-bottom: 1.5px solid var(--accent);
+            position: relative;
+            overflow: hidden;
+        }
+
+            .skeet-avatar::before {
+                content: "";
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background: #e2e5ee;
+                position: absolute;
+                top: 7px;
+                left: 13px;
+            }
+
+            .skeet-avatar::after {
+                content: "";
+                width: 20px;
+                height: 10px;
+                border-radius: 8px 8px 3px 3px;
+                background: #e2e5ee;
+                position: absolute;
+                bottom: 5px;
+                left: 8px;
+            }
+
+        .skeet-lines {
+            flex: 1;
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .skeet-kv {
+            display: flex;
+            justify-content: space-between;
+            color: #c8cbd4;
+        }
+
+            .skeet-kv strong {
+                font-weight: 500;
+                color: var(--accent);
+            }
+
+        .skeet-sep {
+            height: 1px;
+            background: #2c2c32;
+            margin: 4px 0;
+        }
+
+        .skeet-stat {
+            color: #aeb2c0;
+        }
+
+            .skeet-stat strong {
+                font-weight: 500;
+                color: var(--accent);
+            }
+
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .feature-card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+            .feature-card h3 {
+                font-size: 15px;
+                margin-bottom: 6px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 8px;
+            }
+
+            .feature-card .tag {
+                font-size: 10px;
+                text-transform: uppercase;
+                padding: 2px 6px;
+                border-radius: 4px;
+                background: var(--bg-inset);
+                border: 1px solid var(--border);
+                color: var(--accent);
+            }
+
+            .feature-card p {
+                font-size: 13px;
+                color: var(--text-sub);
+            }
+
+        .code-panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 16px;
+        }
+
+        .code-head {
+            padding: 10px 14px;
+            background: #101013;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+            .code-head span {
+                font-size: 12px;
+                font-weight: 700;
+                color: var(--text-sub);
+            }
+
+        pre {
+            padding: 16px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 12px;
+            color: #d8dce8;
+            overflow-x: auto;
+            max-height: 360px;
+            background: var(--bg-inset);
+        }
+
+        .toast {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--accent);
+            color: #fff;
+            padding: 9px 14px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(8px);
+            transition: all 0.18s ease;
+            z-index: 100;
+        }
+
+            .toast.show {
+                opacity: 1;
+                transform: translateY(0);
+            }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <div class="topbar-inner">
+            <div class="brand-wrap">
+                <div class="brand">segfault<span>.gs</span></div>
+                <span class="badge-build">beta · 22 nov 2026</span>
+                <span class="badge-ro">read-only view</span>
+            </div>
+            <nav class="nav-tabs" id="mainNav">
+                <button class="nav-tab active" data-page="overview">Главная</button>
+                <button class="nav-tab" data-page="modules">Модули</button>
+                <button class="nav-tab" data-page="local">Скрипт и запуск</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="page active" id="page-overview">
+            <div class="hero">
+                <div class="hero-copy">
+                    <h1>Публичный просмотр <span>segfault.gs</span></h1>
+                    <p>
+                        Другие пользователи могут открыть страницу по ссылке и посмотреть интерфейс,
+                        модули и код скрипта — без возможности менять содержимое или сохранять правки.
+                    </p>
+                    <div class="meta-strip">
+                        <div class="meta-pill"><strong>Nickname:</strong> 600$</div>
+                        <div class="meta-pill"><strong>UID:</strong> 001</div>
+                        <div class="meta-pill"><strong>Build:</strong> beta</div>
+                        <div class="meta-pill"><strong>Update:</strong> 22 nov 2026</div>
+                    </div>
+                    <div class="action-row">
+                        <button class="primary-btn" id="downloadLuaBtn">Скачать segfault.lua</button>
+                        <button class="secondary-btn" id="copyLuaBtn">Скопировать код</button>
+                    </div>
+                </div>
+
+                <div class="stage-box">
+                    <div class="stage-head">
+                        <div class="stage-title">
+                            <span class="dot-live"></span>
+                            Предпросмотр HUD (только просмотр)
+                        </div>
+                        <div class="controls-bar">
+                            <div class="color-chips" id="colorChips">
+                                <button class="color-chip selected" data-rgb="255,75,110" data-hex="#ff4b6e" style="background:#ff4b6e" title="Rose"></button>
+                                <button class="color-chip" data-rgb="130,195,85" data-hex="#82c355" style="background:#82c355" title="Lime"></button>
+                                <button class="color-chip" data-rgb="90,170,255" data-hex="#5aaaff" style="background:#5aaaff" title="Sky"></button>
+                                <button class="color-chip" data-rgb="180,120,255" data-hex="#b478ff" style="background:#b478ff" title="Violet"></button>
+                            </div>
+                            <select class="ctrl-select" id="layoutSelect">
+                                <option value="floating">Floating Rows</option>
+                                <option value="sheet">Seamless Sheet</option>
+                            </select>
+                            <select class="ctrl-select" id="caseSelect">
+                                <option value="lower">lowercase</option>
+                                <option value="title">Title Case</option>
+                                <option value="upper">UPPERCASE</option>
+                            </select>
+                            <button class="ctrl-btn active" data-toggle="wm">Watermark</button>
+                            <button class="ctrl-btn active" data-toggle="kb">Keybinds</button>
+                            <button class="ctrl-btn active" data-toggle="sp">Spectators</button>
+                            <button class="ctrl-btn active" data-toggle="dbg">Debug</button>
+                            <button class="ctrl-btn active" data-toggle="info">Info</button>
+                        </div>
+                    </div>
+
+                    <div class="viewport">
+                        <div class="hud-wm" id="widget-wm">
+                            <strong style="color:#fff">segfault<span style="color:var(--accent)">.gs</span></strong>
+                            <span class="hud-wm-sep"></span>
+                            <span><span class="hud-wm-val">600$</span></span>
+                            <span class="hud-wm-sep"></span>
+                            <span><span class="hud-wm-val">240</span> <span class="hud-wm-unit" id="wm-fps-u">fps</span></span>
+                            <span class="hud-wm-sep"></span>
+                            <span><span class="hud-wm-val">18</span> <span class="hud-wm-unit" id="wm-ms-u">ms</span></span>
+                            <span class="hud-wm-sep"></span>
+                            <span><span class="hud-wm-val">64</span> <span class="hud-wm-unit" id="wm-tick-u">tick</span></span>
+                        </div>
+
+                        <div class="hud-widget" id="widget-kb">
+                            <div class="hud-header">
+                                <span class="hud-header-ico"></span>
+                                <span class="t-case" data-raw="keybinds">keybinds</span>
+                            </div>
+                            <div class="hud-rows-floating" id="kb-rows">
+                                <div class="hud-row">
+                                    <div class="hud-row-left"><span class="hud-dot"></span><span class="t-case" data-raw="double tap">double tap</span></div>
+                                    <span class="hud-tag t-case" data-raw="toggle">toggle</span>
+                                </div>
+                                <div class="hud-row">
+                                    <div class="hud-row-left"><span class="hud-dot"></span><span class="t-case" data-raw="min damage">min damage</span></div>
+                                    <span class="hud-tag">hp+5</span>
+                                </div>
+                                <div class="hud-row">
+                                    <div class="hud-row-left"><span class="hud-dot"></span><span class="t-case" data-raw="quick peek">quick peek</span></div>
+                                    <span class="hud-tag t-case" data-raw="hold">hold</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="hud-widget" id="widget-sp">
+                            <div class="hud-header">
+                                <span class="hud-header-ico"></span>
+                                <span class="t-case" data-raw="spectators">spectators</span>
+                            </div>
+                            <div class="hud-rows-floating" id="sp-rows">
+                                <div class="hud-row">
+                                    <div class="hud-row-left"><span class="hud-dot"></span><span>kuro</span></div>
+                                    <span class="hud-tag">1st</span>
+                                </div>
+                                <div class="hud-row">
+                                    <div class="hud-row-left"><span class="hud-dot"></span><span>nori</span></div>
+                                    <span class="hud-tag">3rd</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="hud-widget" id="widget-dbg">
+                            <div class="hud-header">
+                                <span class="hud-header-ico"></span>
+                                <span class="t-case" data-raw="debug">debug</span>
+                            </div>
+                            <div class="hud-rows-floating" id="dbg-rows">
+                                <div class="hud-row">
+                                    <div class="hud-row-left"><span class="t-case" data-raw="menu panel">menu panel</span></div>
+                                    <span class="hud-tag" style="color:#9ffca7">ok</span>
+                                </div>
+                                <div class="hud-row">
+                                    <div class="hud-row-left"><span class="t-case" data-raw="memory">memory</span></div>
+                                    <span class="hud-tag">1.42 mb</span>
+                                </div>
+                                <div class="hud-row">
+                                    <div class="hud-row-left"><span class="t-case" data-raw="fps load">fps load</span></div>
+                                    <span class="hud-tag">240 fps / 4.1ms</span>
+                                </div>
+                                <div class="hud-row">
+                                    <div class="hud-row-left"><span class="t-case" data-raw="errors">errors</span></div>
+                                    <span class="hud-tag" style="color:#9ffca7">clean</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="skeet-card" id="widget-info">
+                            <div class="skeet-card-title t-case" data-raw="info">info</div>
+                            <div class="skeet-body">
+                                <div class="skeet-avatar"></div>
+                                <div class="skeet-lines">
+                                    <div class="skeet-kv"><span class="t-case" data-raw="nickname">nickname</span><strong>600$</strong></div>
+                                    <div class="skeet-kv"><span class="t-case" data-raw="uid">uid</span><strong>001</strong></div>
+                                    <div class="skeet-kv"><span class="t-case" data-raw="build">build</span><strong>beta</strong></div>
+                                    <div class="skeet-kv"><span class="t-case" data-raw="update">update</span><strong>22 nov 2026</strong></div>
+                                    <div class="skeet-sep"></div>
+                                    <div class="skeet-stat"><span class="t-case" data-raw="playtime ">playtime </span><strong>0h 46m</strong></div>
+                                    <div class="skeet-stat">
+                                        <span class="t-case" data-raw="kills ">kills </span><strong>8</strong>
+                                        <span class="t-case" data-raw=" deaths "> deaths </span><strong>0</strong>
+                                        <span class="t-case" data-raw=" k/d "> k/d </span><strong>8.00</strong>
+                                    </div>
+                                    <div class="skeet-stat"><span class="t-case" data-raw="headshots ">headshots </span><strong>3</strong> (38%)</div>
+                                    <div class="skeet-stat"><span class="t-case" data-raw="accuracy ">accuracy </span><strong>64%</strong> (18 / 28)</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="page" id="page-modules">
+            <div class="grid-cards">
+                <article class="feature-card">
+                    <h3>Watermark <span class="tag">HUD</span></h3>
+                    <p>Отображает бренд, пользовательский заголовок, ник 600$, FPS, пинг, tickrate, карту, сервер и время.</p>
+                </article>
+                <article class="feature-card">
+                    <h3>Keybinds <span class="tag">HUD</span></h3>
+                    <p>Показывает активные кейбинды с режимами и значениями, поддерживает Floating Rows и Seamless Sheet.</p>
+                </article>
+                <article class="feature-card">
+                    <h3>Spectators <span class="tag">HUD</span></h3>
+                    <p>Собирает наблюдателей за игроком/целью, подсвечивает сторону и режим камеры (1st, 3rd, free).</p>
+                </article>
+                <article class="feature-card">
+                    <h3>Debug Panel <span class="tag">Diag</span></h3>
+                    <p>Следит за состоянием панели меню, расходом памяти Lua, нагрузкой по FPS и счётчик ошибок.</p>
+                </article>
+                <article class="feature-card">
+                    <h3>Info Card <span class="tag">Home</span></h3>
+                    <p>Карточка в стиле групбокса меню с ником 600$, неизменяемым UID (001, 002...), сборкой, датой и статистикой.</p>
+                </article>
+                <article class="feature-card">
+                    <h3>Layout & Drag <span class="tag">Core</span></h3>
+                    <p>Ручное перетаскивание при открытом меню, авторазведение при пересечении и сохранение координат.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="page" id="page-local">
+            <div class="grid-cards">
+                <article class="feature-card">
+                    <h3>Режим просмотра <span class="tag">Read-Only</span></h3>
+                    <p>Посетители могут листать вкладки, смотреть превью и копировать код, но ничего не сохраняется и не меняется на сайте.</p>
+                </article>
+                <article class="feature-card">
+                    <h3>Публикация по ссылке <span class="tag">Share</span></h3>
+                    <p>Залей <code>index.html</code> на GitHub Pages, Cloudflare Pages или Netlify — любой сможет зайти и посмотреть.</p>
+                </article>
+                <article class="feature-card">
+                    <h3>Локальный запуск <span class="tag">PC</span></h3>
+                    <p>Для проверки у себя на ПК запусти <code>python -m http.server 8080</code> в папке с файлом.</p>
+                </article>
+            </div>
+
+            <div class="code-panel">
+                <div class="code-head">
+                    <span>segfault.lua (только чтение и скачивание)</span>
+                    <div style="display:flex; gap:8px;">
+                        <button class="ctrl-btn" id="copyCodeTabBtn">Копировать</button>
+                        <button class="ctrl-btn" id="downloadCodeTabBtn">Скачать .lua</button>
+                    </div>
+                </div>
+                <pre id="luaSourceBlock">-- segfault.gs (build: beta | update: 22 nov 2026)
+local pui = require 'gamesense/pui'
+
+local nickname = '600$'
+local uid = '001'
+
+client.set_event_callback('paint', function()
+    if ui.is_menu_open() then
+        local mx, my = ui.menu_position()
+        local mw, _ = ui.menu_size()
+        local x = mx + mw + 12
+        local y = my
+        renderer.rectangle(x, y, 220, 96, 20, 20, 22, 240)
+        renderer.text(x + 12, y + 12, 255, 75, 110, 255, 'b', 0, 'info')
+        renderer.text(x + 12, y + 32, 215, 218, 226, 255, '', 0, 'nickname: ' .. nickname)
+        renderer.text(x + 12, y + 50, 215, 218, 226, 255, '', 0, 'uid: ' .. uid)
+        renderer.text(x + 12, y + 68, 215, 218, 226, 255, '', 0, 'build: beta')
+    end
+end)</pre>
+            </div>
+        </section>
+    </main>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+            // Флаг режима просмотра: ничего не сохраняется и не изменяется на постоянной основе
+            const READ_ONLY_MODE = true;
+            const root = document.documentElement;
+            const layoutSelect = document.getElementById('layoutSelect');
+            const caseSelect = document.getElementById('caseSelect');
+            const toastEl = document.getElementById('toast');
+
+            function showToast(msg) {
+              toastEl.textContent = msg;
+              toastEl.classList.add('show');
+              clearTimeout(showToast._t);
+              showToast._t = setTimeout(() => toastEl.classList.remove('show'), 1800);
+            }
+
+            function setPage(pageId) {
+              document.querySelectorAll('.nav-tab').forEach((t) => {
+                t.classList.toggle('active', t.dataset.page === pageId);
+              });
+              document.querySelectorAll('.page').forEach((p) => {
+                p.classList.toggle('active', p.id === 'page-' + pageId);
+              });
+            }
+
+            document.querySelectorAll('.nav-tab').forEach((tab) => {
+              tab.addEventListener('click', () => setPage(tab.dataset.page));
+            });
+
+            function setAccent(hex, rgb) {
+              root.style.setProperty('--accent', hex);
+              root.style.setProperty('--accent-rgb', rgb);
+              document.querySelectorAll('.color-chip').forEach((chip) => {
+                chip.classList.toggle('selected', chip.dataset.hex === hex);
+              });
+            }
+
+            document.querySelectorAll('.color-chip').forEach((chip) => {
+              chip.addEventListener('click', () => setAccent(chip.dataset.hex, chip.dataset.rgb));
+            });
+
+            function applyLayout() {
+              const mode = layoutSelect.value;
+              ['kb-rows', 'sp-rows', 'dbg-rows'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.className = mode === 'sheet' ? 'hud-rows-sheet' : 'hud-rows-floating';
+              });
+            }
+
+            function formatText(raw, style) {
+              if (style === 'upper') return raw.toUpperCase();
+              if (style === 'title') {
+                return raw.replace(/\b[a-z]/g, (ch) => ch.toUpperCase());
+              }
+              return raw.toLowerCase();
+            }
+
+            function applyCase() {
+              const style = caseSelect.value;
+              document.querySelectorAll('.t-case').forEach((el) => {
+                const raw = el.getAttribute('data-raw') || '';
+                el.textContent = formatText(raw, style);
+              });
+              ['wm-fps-u', 'wm-ms-u', 'wm-tick-u'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = formatText(el.textContent, style);
+              });
+            }
+
+            const toggleMap = {
+              wm: 'widget-wm',
+              kb: 'widget-kb',
+              sp: 'widget-sp',
+              dbg: 'widget-dbg',
+              info: 'widget-info'
+            };
+
+            document.querySelectorAll('.ctrl-btn[data-toggle]').forEach((btn) => {
+              btn.addEventListener('click', () => {
+                btn.classList.toggle('active');
+                const target = document.getElementById(toggleMap[btn.dataset.toggle]);
+                if (target) {
+                  target.style.display = btn.classList.contains('active') ? '' : 'none';
+                }
+              });
+            });
+
+            layoutSelect.addEventListener('change', applyLayout);
+            caseSelect.addEventListener('change', applyCase);
+
+            const luaCode = document.getElementById('luaSourceBlock').textContent;
+
+            function copyCode() {
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(luaCode).then(() => showToast('Код скопирован в буфер'));
+              } else {
+                showToast('Выделите код в блоке ниже');
+              }
+            }
+
+            function downloadLua() {
+              const blob = new Blob([luaCode], { type: 'text/plain;charset=utf-8' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = 'segfault.lua';
+              a.click();
+              URL.revokeObjectURL(url);
+              showToast('Файл segfault.lua скачан');
+            }
+
+            document.getElementById('copyLuaBtn').addEventListener('click', copyCode);
+            document.getElementById('copyCodeTabBtn').addEventListener('click', copyCode);
+            document.getElementById('downloadLuaBtn').addEventListener('click', downloadLua);
+            document.getElementById('downloadCodeTabBtn').addEventListener('click', downloadLua);
+
+            applyLayout();
+            applyCase();
+    </script>
+</body>
+</html>
